@@ -27,8 +27,8 @@ static void analyze_line(char *line, int line_length) {
     char c = line[i];
     char next_c = line[i + 1];
 
-    printf("[LEXER][ANALYZE_LINE]: _cur_c: %c\n", c);
-    printf("[LEXER][ANALYZE_LINE]: next_c: %c\n", next_c);
+    // printf("[LEXER][ANALYZE_LINE]: _cur_c: %c\n", c);
+    // printf("[LEXER][ANALYZE_LINE]: next_c: %c\n", next_c);
 
     if (c == '\0')
       break;
@@ -38,20 +38,27 @@ static void analyze_line(char *line, int line_length) {
       continue;
     }
 
-    if (c == ';' && (next_c == '\n' || next_c == '\0')) {
-
-      word[word_pos] = '\0';
-
-      printf("[LEXER][ANALYZE_LINE]:Ending Token: %s\n", word);
-      break;
-    }
-
-    if (c == ' ' && next_c != ';') {
+    if (c == ';') {
+      word[word_pos] = c;
+      word_pos++;
       word[word_pos] = '\0';
       int lex_id = lines.lexeme_count;
       int token_id = lines.l[lex_id].token_count;
       struct token t = lines.l[lex_id].token_table[token_id];
-      printf("[LEXER][ANALYZE_LINE]: Token: %s\n", word);
+
+      _create_tokken(&t, word, token_id);
+      printf("[LEXER][ANALYZE_LINE]: Ending Token: %s\n", word);
+      break;
+    }
+
+    if (c != ' ' && (next_c == ' ' || next_c == ';')) {
+      word[word_pos] = c;
+      word_pos++;
+      word[word_pos] = '\0';
+      int lex_id = lines.lexeme_count;
+      int token_id = lines.l[lex_id].token_count;
+      struct token t = lines.l[lex_id].token_table[token_id];
+      printf("[LEXER][ANALYZE_LINE]: middle word: %s\n", word);
 
       _create_tokken(&t, word, token_id);
       lines.l[lex_id].token_table[token_id] = t;
@@ -59,10 +66,14 @@ static void analyze_line(char *line, int line_length) {
 
       word_pos = 0;
       word[word_pos] = '\0';
+
+      continue;
     }
 
-    word[word_pos] = c;
-    word_pos++;
+    if (c != ' ') {
+      word[word_pos] = c;
+      word_pos++;
+    }
   }
 
   free(word);
